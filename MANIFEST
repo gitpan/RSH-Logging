@@ -1,0 +1,12 @@
+Build.PL
+Changes
+Makefile.PL
+MANIFEST
+META.yml			# Will be created by "make dist"
+README
+lib/RSH/Logging.pm
+t/000.load.t
+t/010.RSH-Logging.t
+t/999.perlcritic.t
+t/999.pod-coverage.t
+t/999.pod.t
