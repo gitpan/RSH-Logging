@@ -200,7 +200,7 @@ our @EXPORT_OK = qw(
 our @EXPORT    = qw(
 				   );
 
-our $VERSION = '0.3.0';
+our $VERSION = '0.3.1';
 
 # use/imports go here
 use Log::Log4perl qw(:easy);

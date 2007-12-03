@@ -1,19 +1,17 @@
-RSH-Logging version 0.0.1
+RSH-Logging version 0.3.1
 
-[ REPLACE THIS...
+RSH::Logging is kind of like poor‐man’s profiling or dtrace.  It is
+designed on the same concepts behind logging packages like
+Log::Log4perl, that when event tracking is off, there be little to no
+overhead incurred by leaving the code in place.  This allows you to
+instrument all your code and frameworks and then dynamically turn on
+this kind of profiling information when you need it.
 
-  The README is used to introduce the module and provide instructions on
-  how to install the module, any machine dependencies it may have (for
-  example C compilers and installed libraries) and any other information
-  that should be understood before the module is installed.
+Execute perldoc lib/RSH/Logging.pm to see the more detailed documentation
+for this module.
 
-  A README file is required for CPAN modules since CPAN extracts the
-  README file from a module distribution so that people browsing the
-  archive can use it get an idea of the modules uses. It is usually a
-  good idea to provide version information here so that people can
-  decide whether fixes for the module are worth downloading.
-]
-
+RSH::Logging makes use of Module::Install for building, installation,
+and packaging.
 
 INSTALLATION
 
@@ -26,8 +24,8 @@ INSTALLATION
 
 DEPENDENCIES
 
-None.
-
+The dependencies should be satisfied via Module::Install.  See the
+Makefile.PL for a list of specific module dependencies.
 
 COPYRIGHT AND LICENCE
 
