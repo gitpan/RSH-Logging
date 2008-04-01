@@ -200,7 +200,7 @@ our @EXPORT_OK = qw(
 our @EXPORT    = qw(
 				   );
 
-our $VERSION = '0.3.1';
+our $VERSION = '0.3.2';
 
 # use/imports go here
 use Log::Log4perl qw(:easy);
@@ -378,7 +378,8 @@ sub print_event_tracking_results {
     _event_tree_table($t, $results, 0);
     my $elapsed = tv_interval($results->{start}, $results->{stop});
     
-    my $av = sprintf '%.3f', ( $elapsed == 0 ? '??' : ( 1 / $elapsed ) );
+    my $av = sprintf '%.3f', ( $elapsed == 0 ? -1 : ( 1 / $elapsed ) );
+    $av = '??' if ($av < 0);
     
     my $msg = "TOTAL TIME ${elapsed}s ($av/s)\n" . $t->draw . "\n";
     if ($logger) {

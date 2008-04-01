@@ -24,4 +24,4 @@ requires:
   Text::SimpleTable: 0
   Time::HiRes: 0
   perl: 5.8.0
-version: 0.3.1
+version: 0.3.2
