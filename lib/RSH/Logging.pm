@@ -200,21 +200,27 @@ our @EXPORT_OK = qw(
 our @EXPORT    = qw(
 				   );
 
-our $VERSION = '0.3.2';
+our $VERSION = '0.4.0';
 
 # use/imports go here
 use Log::Log4perl qw(:easy);
 our $logger = get_logger(__PACKAGE__);
 use Scalar::Util qw(blessed);
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Text::SimpleTable;
+#use Text::SimpleTable;
+use RSH::Logging::TextTable;
 use IO::Handle;
 use IO::File;
 
 # ******************** Class Methods ********************
 
+# The number of rows we automatically start using chunking at.
+# A value of <= 0 means no auto-chunking.
+our $AUTO_CHUNK_LIMIT = -1;
+
 our $tracking = 0;
 our $event_tree;
+our $event_count = 0;
 our $curr;
 our @parents;
 our $results;
@@ -275,6 +281,7 @@ sub start_event_tracking {
         # otherwise ...
         $tracking = 1;
         $event_tree = undef;
+        $event_count = 0;
         $results = undef;
         $curr = undef;
         @parents = ();
@@ -312,7 +319,7 @@ sub stop_event_tracking {
     }
 }
 
-=item print_event_tracking_results($to_target)
+=item print_event_tracking_results($to_target, [$chunk_it])
 
 Prints the event tree to a specified target if event tracking was started
 and stopped successfully.  The target may be either a Logger from
@@ -344,12 +351,16 @@ The module then made two calls, one to "Database code" and another to "My piece
 of work"--these two events are peers and children of the module event.  
 Other calls may have been made, but they were not instrumented using start/stop_event.
 
+If the second parameter is "true", then chunking will be used if supported for
+the C<$to_target> value.  Only filehandles and Log4Perl are supported currently.
+
 =cut
 
 sub print_event_tracking_results {
     return unless defined($results);
     
     my $to = shift;
+    my $chunk_it = shift;
     my $fh = undef;
     my $logger = undef;
     if (blessed($to) and $to->isa('Log::Log4perl::Logger')) {
@@ -368,7 +379,9 @@ sub print_event_tracking_results {
     return unless defined($fh) or defined($logger);
     return if (defined($logger) and (not $logger->is_debug));
     
-    my $t = Text::SimpleTable->new( [ 62, 'Event' ], [ 9, 'Time' ] );
+    
+#    my $t = Text::SimpleTable->new( [ 62, 'Event' ], [ 9, 'Time' ] );
+    my $t = RSH::Logging::TextTable->new( [ 62, 'Event' ], [ 9, 'Time' ] );
 #    while (defined($ptr)) {
 #        $elapsed = tv_interval($ptr->{start}, $ptr->{stop});
 #        $ptr->{elapsed} = sprintf( '%fs', $elapsed );
@@ -381,12 +394,33 @@ sub print_event_tracking_results {
     my $av = sprintf '%.3f', ( $elapsed == 0 ? -1 : ( 1 / $elapsed ) );
     $av = '??' if ($av < 0);
     
-    my $msg = "TOTAL TIME ${elapsed}s ($av/s)\n" . $t->draw . "\n";
+#    my $msg = "TOTAL TIME ${elapsed}s ($av/s)\n" . $t->draw . "\n";
+#    if ($logger) {
+#        $logger->debug($msg);
+#    }
+#    else {
+#        print $fh $msg;
+#    }
+    my $output;
     if ($logger) {
-        $logger->debug($msg);
+        $output = sub {
+            $logger->debug(@_);
+        };
     }
     else {
-        print $fh $msg;
+        $output = sub {
+            print $fh @_;
+        }
+    }
+    
+    my $table_row_count = @{$t->{columns}->[0]->[1]} - 1; # hack lifted form Text::SimpleTable
+    if ($chunk_it or (($AUTO_CHUNK_LIMIT > 0) and ($table_row_count >= $AUTO_CHUNK_LIMIT)) ) {
+        $output->("TOTAL TIME ${elapsed}s ($av/s)\n");
+        $t->draw($output);
+        $output->("\n");
+    }
+    else {
+        $output->("TOTAL TIME ${elapsed}s ($av/s)\n" . $t->draw . "\n");
     }
 }
 
@@ -412,6 +446,18 @@ This method will return undef if stop_event_tracking has not been called.
 
 sub get_event_tracking_results {
     return $results;
+}
+
+=item get_event_count()
+
+Returns a count of the number of events.  Everytime a start_event is called will
+increase the count until another event tracking result is created (i.e. 
+stop_event_tracking + start_event_tracking).
+
+=cut
+
+sub get_event_count {
+    return $event_count;    
 }
 
 =begin private
@@ -475,6 +521,7 @@ sub start_event {
     }
     $curr = $new;
     $event_tree = $curr if not defined($event_tree);
+    $event_count++;
 }
 
 =item stop_event()
@@ -509,7 +556,7 @@ L<http://www.rshtech.com/software/>
 
 =head1 AUTHOR
 
-Matt Luker  C<< <mluker@rshtech.com> >>
+Matt Luker  C<< <mluker@cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 

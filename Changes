@@ -1,5 +1,8 @@
 Revision history for RSH-Logging
 
+0.4.0  Thu Mar  15 09:22:00 PDT 2012
+       Added basic chunking (Log4Perl chokes are larger stuff)
+
 0.3.2  Tue Apr  1 10:40:00 EST 2008
        Fix for time interval coming back with bad values.
 
