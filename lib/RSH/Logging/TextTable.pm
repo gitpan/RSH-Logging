@@ -111,6 +111,8 @@ sub new {
 #
 # ******************** Functionality ********************
 
+=back
+
 =head3 Functionality
 
 =over
