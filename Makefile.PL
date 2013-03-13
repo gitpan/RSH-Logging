@@ -10,9 +10,9 @@ requires 'Text::SimpleTable';
 requires 'Time::HiRes';
 build_requires 'Test::More';
 
-# Install these for more testing/coverage
-#build_requires 'Test::Pod';
-#build_requires 'Test::Perl::Critic';
+recommends 'Test::Pod';
+recommends 'Test::Pod::Coverage';
+recommends 'Test::Perl::Critic';
 
 
 install_script glob('script/*.pl');
